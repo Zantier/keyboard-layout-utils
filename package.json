@@ -2,5 +2,11 @@
   "name": "keyboard-layout-utils",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "start": "tsc && node index.js"
+  },
+  "dependencies": {
+    "typescript": "^4.1.3"
+  }
 }
