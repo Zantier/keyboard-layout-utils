@@ -236,9 +236,7 @@ async function writeSvg(keyboardName: string, layoutText: string) {
     layer2_left = board_padding - 0.5*hole_gap + 5.5*u - usb_width2;
     layer2_right = board_padding - 0.5*hole_gap + 1.25*u - trrs_width2;
   } else {
-    // Close enough to the same position, so just line it up with the screw padding
-    layer2_left = 0;
-    //layer2_left = board_padding - 0.5*hole_gap + 0.75*u - trrs_width2;
+    layer2_left = board_padding - 0.5*hole_gap + 0.75*u - trrs_width2;
     layer2_right = board_padding - 0.5*hole_gap + 6.0*u - usb_width2;
   }
   text += board_outline;
@@ -253,9 +251,7 @@ async function writeSvg(keyboardName: string, layoutText: string) {
     layer3_left = board_padding - 0.5*hole_gap + 6.5*u - trrs_legs_width2;
     layer3_right = board_padding - 0.5*hole_gap + 1.25*u - trrs_width2;
   } else {
-    // Close enough to the same position, so just line it up with the screw padding
-    layer3_left = 0;
-    //layer3_left = board_padding - 0.5*hole_gap + 0.75*u - trrs_width2;
+    layer3_left = board_padding - 0.5*hole_gap + 0.75*u - trrs_width2;
     layer3_right = board_padding - 0.5*hole_gap + 7.0*u - trrs_legs_width2;
   }
   text += board_outline;
