@@ -201,10 +201,12 @@ async function writeSvg(keyboardName: string, layoutText: string) {
   board_outline += `      H ${corner_radius} a ${corner_radius+kerf2} ${corner_radius+kerf2} 0 0 1 -${corner_radius+kerf2} -${corner_radius+kerf2}\n`;
   board_outline += `      V ${corner_radius} a ${corner_radius+kerf2} ${corner_radius+kerf2} 0 0 1 ${corner_radius+kerf2} -${corner_radius+kerf2}\n`;
 
+  // ponoko needs style on each g element
+  let styleText = 'style="fill:none;stroke:#000000;stroke-width:0.2"';
   let text = '<?xml version="1.0" encoding="UTF-8"?>\n';
   text += '<svg xmlns="http://www.w3.org/2000/svg" width="790mm" height="384mm" viewBox="0 0 790 384"\n';
-  text += '  style="fill:none;stroke:#000000;stroke-width:0.2">\n';
-  text += `  <g transform="translate(${board_offset_padding} ${board_offset_padding})">\n`;
+  text += `  ${styleText}>\n`;
+  text += `  <g transform="translate(${board_offset_padding} ${board_offset_padding})" ${styleText}>\n`;
   text += board_outline;
   text += `      Z" />\n`;
   for (let row = 0; row < layout.length; row++) {
@@ -227,7 +229,7 @@ async function writeSvg(keyboardName: string, layoutText: string) {
   // the trrs socket is laid on its side, with the legs pointing towards the micro usb socket
   // half width of trrs + leg length >= 5.3
   let trrs_legs_width2 = 7.0;
-  text += `  <g transform="translate(${board_offset_padding} ${board_offset_y})">\n`;
+  text += `  <g transform="translate(${board_offset_padding} ${board_offset_y})" ${styleText}>\n`;
   let layer2_left: number;
   let layer2_right: number;
   if (keyboardName === 'left') {
@@ -244,7 +246,7 @@ async function writeSvg(keyboardName: string, layoutText: string) {
   text += '  </g>\n';
 
   // Layer 4
-  text += `  <g transform="translate(${board_offset_x} ${board_offset_y})">\n`;
+  text += `  <g transform="translate(${board_offset_x} ${board_offset_y})" ${styleText}>\n`;
   text += board_outline;
   text += `      Z" />\n`;
   text += '  </g>\n';
