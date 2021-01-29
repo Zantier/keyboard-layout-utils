@@ -164,16 +164,16 @@ function get_layer(top_length_left: number, top_length_right: number): string {
   }
   // top left screw padding
   text += `      H ${screw_square+kerf2}\n`;
-  text += `      V ${screw_square+kerf2} H ${board_padding+kerf2}\n`;
+  text += `      V ${screw_square2} a ${screw_square2+kerf2} ${screw_square2+kerf2} 0 0 1 -${screw_square2+kerf2} ${screw_square2+kerf2} H ${board_padding+kerf2}\n`;
   // bottom left screw padding
   text += `      V ${board_height-screw_square-kerf2}\n`;
-  text += `      H ${screw_square+kerf2} V ${board_height-(board_padding+kerf2)}\n`;
+  text += `      H ${screw_square2} a ${screw_square2+kerf2} ${screw_square2+kerf2} 0 0 1 ${screw_square2+kerf2} ${screw_square2+kerf2} V ${board_height-(board_padding+kerf2)}\n`;
   // bottom right screw padding
   text += `      H ${board_width-(screw_square+kerf2)}\n`;
-  text += `      V ${board_height-(screw_square+kerf2)} H ${board_width-(board_padding+kerf2)}\n`;
+  text += `      V ${board_height-(screw_square2)} a ${screw_square2+kerf2} ${screw_square2+kerf2} 0 0 1 ${screw_square2+kerf2} -${screw_square2+kerf2} H ${board_width-(board_padding+kerf2)}\n`;
   // top right screw padding (1u lower, so more tricky)
   text += `      V ${screw_top_right+screw_square+kerf2}\n`;
-  text += `      H ${board_width-(screw_square+kerf2)} V ${screw_top_right-kerf2} H ${board_width-(board_padding+kerf2)}\n`;
+  text += `      H ${board_width-(screw_square2)} a ${screw_square2+kerf2} ${screw_square2+kerf2} 0 0 1 0 -${screw_square+kerf} H ${board_width-(board_padding+kerf2)}\n`;
   text += `      V ${board_padding+kerf2} H ${board_width-top_length_right-kerf2} V ${-kerf2}\n`;
   text += `      Z" />\n`;
   let radius = 0.5*(screw_size_big)-kerf2;
