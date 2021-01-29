@@ -7,6 +7,7 @@
     "start": "tsc && node index.js"
   },
   "dependencies": {
+    "@types/node": "^14.14.22",
     "typescript": "^4.1.3"
   }
 }
