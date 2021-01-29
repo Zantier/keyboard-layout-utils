@@ -18,8 +18,8 @@ const board_width = 7.75*u - hole_gap + 2*board_padding;
 const board_height = 5*u - hole_gap + 2*board_padding;
 const corner_radius = 5.05;
 const board_offset_padding = board_padding + kerf;
-const board_offset_x = board_offset_padding + 0*(board_width + board_offset_padding);
-const board_offset_y = board_offset_padding + 0*(board_height + board_offset_padding);
+const board_offset_x = 1*(board_width + board_offset_padding);
+const board_offset_y = 1*(board_height + board_offset_padding);
 // M2 >= 2.0
 const screw_size_small = 2.1;
 // spacer >= 3.3
@@ -31,7 +31,9 @@ const screw_square2 = 0.5*screw_square;
 // The gap between the screw padding and a key hole 0.5u from the edge of the board
 const screw_padding_gap = (board_padding + 0.5*u) - screw_square;
 // How far down screw padding in top right is
-const screw_top_right = board_padding + u - hole_gap + screw_padding_gap;
+const screw_top_right = board_padding + u - hole_gap;
+// ponoko needs style on each g element
+const styleText = 'style="fill:none;stroke:#000000;stroke-width:0.2"';
 
 function parseKeyboardLayoutField(text: string): [KeyboardLayoutField, string] | 'error' {
   if (text.length === 0) {
@@ -184,7 +186,7 @@ function get_layer(top_length_left: number, top_length_right: number): string {
   return text;
 }
 
-async function writeSvg(keyboardName: string, layoutText: string) {
+function getSvg(keyboardName: string, layoutText: string, svgPos: number): string {
   console.log(keyboardName);
   let layout = parseKeyboardLayout(layoutText);
   if (layout === 'error') {
@@ -202,11 +204,8 @@ async function writeSvg(keyboardName: string, layoutText: string) {
   board_outline += `      V ${corner_radius} a ${corner_radius+kerf2} ${corner_radius+kerf2} 0 0 1 ${corner_radius+kerf2} -${corner_radius+kerf2}\n`;
 
   // ponoko needs style on each g element
-  let styleText = 'style="fill:none;stroke:#000000;stroke-width:0.2"';
-  let text = '<?xml version="1.0" encoding="UTF-8"?>\n';
-  text += '<svg xmlns="http://www.w3.org/2000/svg" width="790mm" height="384mm" viewBox="0 0 790 384"\n';
-  text += `  ${styleText}>\n`;
-  text += `  <g transform="translate(${board_offset_padding} ${board_offset_padding})" ${styleText}>\n`;
+  let text = '';
+  text += `  <g transform="translate(${board_offset_padding + 0*board_offset_x} ${board_offset_padding + svgPos*board_offset_y})" ${styleText}>\n`;
   text += board_outline;
   text += `      Z" />\n`;
   for (let row = 0; row < layout.length; row++) {
@@ -229,7 +228,7 @@ async function writeSvg(keyboardName: string, layoutText: string) {
   // the trrs socket is laid on its side, with the legs pointing towards the micro usb socket
   // half width of trrs + leg length >= 5.3
   let trrs_legs_width2 = 7.0;
-  text += `  <g transform="translate(${board_offset_padding} ${board_offset_y})" ${styleText}>\n`;
+  text += `  <g transform="translate(${board_offset_padding + 1*board_offset_x} ${board_offset_padding + svgPos*board_offset_y})" ${styleText}>\n`;
   let layer2_left: number;
   let layer2_right: number;
   if (keyboardName === 'left') {
@@ -244,7 +243,7 @@ async function writeSvg(keyboardName: string, layoutText: string) {
   text += '  </g>\n';
 
   // Layer 3
-  text += `  <g transform="translate(${board_offset_x} ${board_offset_padding})" ${styleText}>\n`;
+  text += `  <g transform="translate(${board_offset_padding + 2*board_offset_x} ${board_offset_padding + svgPos*board_offset_y})" ${styleText}>\n`;
   let layer3_left: number;
   let layer3_right: number;
   if (keyboardName === 'left') {
@@ -259,14 +258,16 @@ async function writeSvg(keyboardName: string, layoutText: string) {
   text += '  </g>\n';
 
   // Layer 4
-  text += `  <g transform="translate(${board_offset_x} ${board_offset_y})" ${styleText}>\n`;
+  text += `  <g transform="translate(${board_offset_padding + 3*board_offset_x} ${board_offset_padding + svgPos*board_offset_y})" ${styleText}>\n`;
   text += board_outline;
   text += `      Z" />\n`;
+  text += `    <circle cx="${screw_square2}" cy="${screw_square2}" r="${radius}" />\n`;
+  text += `    <circle cx="${screw_square2}" cy="${board_height-screw_square2}" r="${radius}" />\n`;
+  text += `    <circle cx="${board_width-screw_square2}" cy="${board_height-screw_square2}" r="${radius}" />\n`;
+  text += `    <circle cx="${board_width-screw_square2}" cy="${screw_top_right+screw_square2}" r="${radius}" />\n`;
   text += '  </g>\n';
 
-  text += '</svg>\n';
-
-  await fs.writeFile(keyboardName + '.svg', text, 'utf8');
+  return text;
 }
 
 async function main() {
@@ -274,8 +275,14 @@ async function main() {
   let rightText = await fs.readFile('right.txt', 'utf8');
   //showKeyPositions('left', leftText);
   //showKeyPositions('right', rightText);
-  await writeSvg('left', leftText);
-  await writeSvg('right', rightText);
+  let svgAll = '';
+  svgAll += '<?xml version="1.0" encoding="UTF-8"?>\n';
+  svgAll += '<svg xmlns="http://www.w3.org/2000/svg" width="790mm" height="384mm" viewBox="0 0 790 384"\n';
+  svgAll += `  ${styleText}>\n`;
+  svgAll += getSvg('left', leftText, 0);
+  svgAll += getSvg('right', rightText, 1);
+  svgAll += '</svg>\n';
+  await fs.writeFile('out.svg', svgAll, 'utf8');
 }
 
 main();
