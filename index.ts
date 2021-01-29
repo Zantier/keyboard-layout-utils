@@ -145,6 +145,26 @@ function showKeyPositions(keyboardName: string, layoutText: string) {
   console.log('');
 }
 
+// Get part of the svg text for a sandwich layer, assuming the board outline came beforehand.
+// This includes gaps at the top for micro usb and trrs, and screw holes.
+function get_layer(top_length_left: number, top_length_right: number): string {
+  let text = '';
+  text += `      h ${top_length_left-corner_radius+kerf2} v ${board_padding+kerf}\n`;
+  // top left screw padding
+  // kerf cancels out
+  text += `      h -${top_length_left-(screw_size_big+2*screw_padding)} v ${screw_size_big+2*screw_padding-board_padding}\n`;
+  text += `      h -${screw_size_big+2*screw_padding-board_padding} v ${board_height-2*(screw_size_big+2*screw_padding)-kerf}\n`;
+  // bottom left screw padding
+  text += `      h ${screw_size_big+2*screw_padding-board_padding} v ${screw_size_big+2*screw_padding-board_padding}\n`;
+  // bottom right screw padding
+  text += `      h ${board_width-2*(screw_size_big+2*screw_padding)-kerf} v -${screw_size_big+2*screw_padding-board_padding}\n`;
+  text += `      h ${screw_size_big+2*screw_padding-board_padding} v -${board_height-(screw_size_big+2*screw_padding)-board_padding-u-kerf}\n`;
+  // top right screw padding (1u lower, so more tricky
+  text += `      h -${top_length_right-board_padding} v -${board_padding+kerf}\n`;
+  text += `      Z" />\n`;
+  return text;
+}
+
 async function writeSvg(keyboardName: string, layoutText: string) {
   console.log(keyboardName);
   let layout = parseKeyboardLayout(layoutText);
@@ -153,6 +173,7 @@ async function writeSvg(keyboardName: string, layoutText: string) {
     return;
   }
 
+  // The outline of the board, aprt from the top, starting with the top right curve
   // Add kerf on all sides, so that key positions don't need to change
   let board_outline = '';
   board_outline += `    <path d="M ${board_width-corner_radius} ${-kerf2}\n`;
@@ -183,23 +204,19 @@ async function writeSvg(keyboardName: string, layoutText: string) {
   // half width of trrs + leg length >= 5.3
   let trrs_legs_width2 = 7.0;
   text += `  <g transform="translate(0 ${board_offset_y})">\n`;
+  let layer2_left: number;
+  let layer2_right: number;
   if (keyboardName === 'left') {
-    let top_length_left = board_padding - 0.5*hole_gap + 5.5*u - usb_width2;
-    let top_length_right = board_padding - 0.5*hole_gap + 1.25*u - trrs_width2;
-    text += board_outline;
-    text += `      h ${top_length_left-corner_radius+kerf2} v ${board_padding+kerf}\n`;
-    text += `      h -${top_length_left-board_padding} v ${board_height-2*board_padding-kerf}\n`;
-    text += `      h ${board_width-2*board_padding-kerf} v -${board_height-2*board_padding-kerf}\n`;
-    text += `      h -${top_length_right-board_padding} v -${board_padding+kerf}\n`;
-    text += `      Z" />\n`;
+    layer2_left = board_padding - 0.5*hole_gap + 5.5*u - usb_width2;
+    layer2_right = board_padding - 0.5*hole_gap + 1.25*u - trrs_width2;
   } else {
-    text += board_outline;
-    text += `      h ${0} v ${0}\n`;
-    text += `      h ${0} v ${0}\n`;
-    text += `      h ${0} v ${0}\n`;
-    text += `      h ${0} v ${0}\n`;
-    text += `      Z" />\n`;
+    // Close enough to the same position, so just line it up with the screw padding
+    layer2_left = screw_size_big+2*screw_padding;
+    //layer2_left = board_padding - 0.5*hole_gap + 0.75*u - trrs_width2;
+    layer2_right = board_padding - 0.5*hole_gap + 6.0*u - usb_width2;
   }
+  text += board_outline;
+  text += get_layer(layer2_left, layer2_right);
   text += '  </g>\n';
 
   // Layer 4
