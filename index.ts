@@ -158,23 +158,29 @@ function showKeyPositions(keyboardName: string, layoutText: string) {
 // Starting in the top left, after the curved corner.
 function get_layer(top_length_left: number, top_length_right: number): string {
   let text = '';
-  if (top_length_left === 0) {
-    // Line it up with the screw padding
-  } else {
+  // 0 to indicate lining up with the screw square
+  if (top_length_left !== 0) {
+    text += `      H ${top_length_left+kerf2} V ${board_padding+kerf2}\n`;
   }
-  text += `      H ${top_length_left+kerf2} V ${board_padding+kerf2} H ${screw_square+kerf2}\n`;
   // top left screw padding
+  text += `      H ${screw_square+kerf2}\n`;
   text += `      V ${screw_square+kerf2} H ${board_padding+kerf2}\n`;
-  text += `      V ${board_height-screw_square-kerf2}\n`;
   // bottom left screw padding
+  text += `      V ${board_height-screw_square-kerf2}\n`;
   text += `      H ${screw_square+kerf2} V ${board_height-(board_padding+kerf2)}\n`;
-  text += `      H ${board_width-(screw_square+kerf2)}\n`;
   // bottom right screw padding
+  text += `      H ${board_width-(screw_square+kerf2)}\n`;
   text += `      V ${board_height-(screw_square+kerf2)} H ${board_width-(board_padding+kerf2)}\n`;
-  text += `      V ${screw_square+u+kerf2}\n`;
-  // top right screw padding (1u lower, so more tricky
-  text += `      h -${top_length_right-board_padding} v -${board_padding+kerf}\n`;
+  // top right screw padding (1u lower, so more tricky)
+  text += `      V ${screw_top_right+screw_square+kerf2}\n`;
+  text += `      H ${board_width-(screw_square+kerf2)} V ${screw_top_right-kerf2} H ${board_width-(board_padding+kerf2)}\n`;
+  text += `      V ${board_padding+kerf2} H ${board_width-top_length_right-kerf2} V ${-kerf2}\n`;
   text += `      Z" />\n`;
+  let radius = 0.5*(screw_size_big)-kerf2;
+  text += `    <circle cx="${screw_square2}" cy="${screw_square2}" r="${radius}" />\n`;
+  text += `    <circle cx="${screw_square2}" cy="${board_height-screw_square2}" r="${radius}" />\n`;
+  text += `    <circle cx="${board_width-screw_square2}" cy="${board_height-screw_square2}" r="${radius}" />\n`;
+  text += `    <circle cx="${board_width-screw_square2}" cy="${screw_top_right+screw_square2}" r="${radius}" />\n`;
   return text;
 }
 
@@ -207,6 +213,11 @@ async function writeSvg(keyboardName: string, layoutText: string) {
       text += `    <rect width="${hole_width - kerf}" height="${hole_width - kerf}" x="${board_padding + x*u + kerf2}" y="${board_padding + row*u + kerf2}" />\n`;
     }
   }
+  let radius = 0.5*(screw_size_small)-kerf2;
+  text += `    <circle cx="${screw_square2}" cy="${screw_square2}" r="${radius}" />\n`;
+  text += `    <circle cx="${screw_square2}" cy="${board_height-screw_square2}" r="${radius}" />\n`;
+  text += `    <circle cx="${board_width-screw_square2}" cy="${board_height-screw_square2}" r="${radius}" />\n`;
+  text += `    <circle cx="${board_width-screw_square2}" cy="${screw_top_right+screw_square2}" r="${radius}" />\n`;
   text += '  </g>\n';
 
   // Layer 2 - micro usb + trrs
