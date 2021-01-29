@@ -17,15 +17,19 @@ const kerf2 = 0.5*kerf;
 const board_width = 7.75*u - hole_gap + 2*board_padding;
 const board_height = 5*u - hole_gap + 2*board_padding;
 const corner_radius = 5.05;
-const board_offset_x = 0*(board_width + 5);
-const board_offset_y = 0*(board_height + 5);
+const board_offset_padding = board_padding + kerf;
+const board_offset_x = board_offset_padding + 0*(board_width + board_offset_padding);
+const board_offset_y = board_offset_padding + 0*(board_height + board_offset_padding);
 // M2 >= 2.0
 const screw_size_small = 2.1;
 // spacer >= 3.3
 const screw_size_big = 3.4;
 const screw_padding = hole_gap;
+// The full screw_padding square width
+const screw_square = screw_size_big+2*screw_padding;
+const screw_square2 = 0.5*screw_square;
 // The gap between the screw padding and a key hole 0.5u from the edge of the board
-const screw_padding_gap = (board_padding + 0.5*u) - (screw_size_big + 2*screw_padding);
+const screw_padding_gap = (board_padding + 0.5*u) - screw_square;
 // How far down screw padding in top right is
 const screw_top_right = board_padding + u - hole_gap + screw_padding_gap;
 
@@ -154,17 +158,20 @@ function showKeyPositions(keyboardName: string, layoutText: string) {
 // Starting in the top left, after the curved corner.
 function get_layer(top_length_left: number, top_length_right: number): string {
   let text = '';
-  text += `      h ${top_length_left-corner_radius+kerf2} v ${board_padding+kerf} h -${top_length_left-(screw_size_big+2*screw_padding)}\n`;
+  if (top_length_left === 0) {
+    // Line it up with the screw padding
+  } else {
+  }
+  text += `      H ${top_length_left+kerf2} V ${board_padding+kerf2} H ${screw_square+kerf2}\n`;
   // top left screw padding
-  // kerf cancels out
-  text += `      v ${screw_size_big+2*screw_padding-board_padding} h -${screw_size_big+2*screw_padding-board_padding}\n`;
-  text += `      v ${board_height-2*(screw_size_big+2*screw_padding)-kerf}\n`;
+  text += `      V ${screw_square+kerf2} H ${board_padding+kerf2}\n`;
+  text += `      V ${board_height-screw_square-kerf2}\n`;
   // bottom left screw padding
-  text += `      h ${screw_size_big+2*screw_padding-board_padding} v ${screw_size_big+2*screw_padding-board_padding}\n`;
-  text += `      h ${board_width-2*(screw_size_big+2*screw_padding)-kerf}\n`;
+  text += `      H ${screw_square+kerf2} V ${board_height-(board_padding+kerf2)}\n`;
+  text += `      H ${board_width-(screw_square+kerf2)}\n`;
   // bottom right screw padding
-  text += `      v -${screw_size_big+2*screw_padding-board_padding} h ${screw_size_big+2*screw_padding-board_padding}\n`;
-  text += `      v -${board_height-(screw_size_big+2*screw_padding)-board_padding-u-kerf}\n`;
+  text += `      V ${board_height-(screw_square+kerf2)} H ${board_width-(board_padding+kerf2)}\n`;
+  text += `      V ${screw_square+u+kerf2}\n`;
   // top right screw padding (1u lower, so more tricky
   text += `      h -${top_length_right-board_padding} v -${board_padding+kerf}\n`;
   text += `      Z" />\n`;
@@ -184,14 +191,14 @@ async function writeSvg(keyboardName: string, layoutText: string) {
   let board_outline = '';
   board_outline += `    <path d="M ${board_width-corner_radius} ${-kerf2}\n`;
   board_outline += `      a ${corner_radius+kerf2} ${corner_radius+kerf2} 0 0 1 ${corner_radius+kerf2} ${corner_radius+kerf2}\n`;
-  board_outline += `      v ${board_height-2*corner_radius} a ${corner_radius+kerf2} ${corner_radius+kerf2} 0 0 1 -${corner_radius+kerf2} ${corner_radius+kerf2}\n`;
-  board_outline += `      h -${board_width-2*corner_radius} a ${corner_radius+kerf2} ${corner_radius+kerf2} 0 0 1 -${corner_radius+kerf2} -${corner_radius+kerf2}\n`;
-  board_outline += `      v -${board_height-2*corner_radius} a ${corner_radius+kerf2} ${corner_radius+kerf2} 0 0 1 ${corner_radius+kerf2} -${corner_radius+kerf2}\n`;
+  board_outline += `      V ${board_height-corner_radius} a ${corner_radius+kerf2} ${corner_radius+kerf2} 0 0 1 -${corner_radius+kerf2} ${corner_radius+kerf2}\n`;
+  board_outline += `      H ${corner_radius} a ${corner_radius+kerf2} ${corner_radius+kerf2} 0 0 1 -${corner_radius+kerf2} -${corner_radius+kerf2}\n`;
+  board_outline += `      V ${corner_radius} a ${corner_radius+kerf2} ${corner_radius+kerf2} 0 0 1 ${corner_radius+kerf2} -${corner_radius+kerf2}\n`;
 
   let text = '<?xml version="1.0" encoding="UTF-8"?>\n';
   text += '<svg xmlns="http://www.w3.org/2000/svg" width="790mm" height="384mm" viewBox="0 0 790 384"\n';
   text += '  style="fill:none;stroke:#000000;stroke-width:0.2">\n';
-  text += '  <g transform="translate(0 0)">\n';
+  text += `  <g transform="translate(${board_offset_padding} ${board_offset_padding})">\n`;
   text += board_outline;
   text += `      Z" />\n`;
   for (let row = 0; row < layout.length; row++) {
@@ -209,7 +216,7 @@ async function writeSvg(keyboardName: string, layoutText: string) {
   // the trrs socket is laid on its side, with the legs pointing towards the micro usb socket
   // half width of trrs + leg length >= 5.3
   let trrs_legs_width2 = 7.0;
-  text += `  <g transform="translate(0 ${board_offset_y})">\n`;
+  text += `  <g transform="translate(${board_offset_padding} ${board_offset_y})">\n`;
   let layer2_left: number;
   let layer2_right: number;
   if (keyboardName === 'left') {
