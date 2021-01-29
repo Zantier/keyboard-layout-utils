@@ -245,6 +245,23 @@ async function writeSvg(keyboardName: string, layoutText: string) {
   text += get_layer(layer2_left, layer2_right);
   text += '  </g>\n';
 
+  // Layer 3
+  text += `  <g transform="translate(${board_offset_x} ${board_offset_padding})" ${styleText}>\n`;
+  let layer3_left: number;
+  let layer3_right: number;
+  if (keyboardName === 'left') {
+    layer3_left = board_padding - 0.5*hole_gap + 6.5*u - trrs_legs_width2;
+    layer3_right = board_padding - 0.5*hole_gap + 1.25*u - trrs_width2;
+  } else {
+    // Close enough to the same position, so just line it up with the screw padding
+    layer3_left = 0;
+    //layer3_left = board_padding - 0.5*hole_gap + 0.75*u - trrs_width2;
+    layer3_right = board_padding - 0.5*hole_gap + 7.0*u - trrs_legs_width2;
+  }
+  text += board_outline;
+  text += get_layer(layer3_left, layer3_right);
+  text += '  </g>\n';
+
   // Layer 4
   text += `  <g transform="translate(${board_offset_x} ${board_offset_y})" ${styleText}>\n`;
   text += board_outline;
