@@ -17,7 +17,7 @@ const kerf2 = 0.5*kerf;
 const board_width = 7.75*u - hole_gap + 2*board_padding;
 const board_height = 5*u - hole_gap + 2*board_padding;
 const corner_radius = 5.05;
-const board_offset_padding = board_padding + kerf;
+const board_offset_padding = 0.75*board_padding + kerf;
 const board_offset_x = 1*(board_width + board_offset_padding);
 const board_offset_y = 1*(board_height + board_offset_padding);
 // M2 >= 2.0
@@ -156,12 +156,15 @@ function showKeyPositions(keyboardName: string, layoutText: string) {
 }
 
 // Get part of the svg text for a sandwich layer, assuming the board outline came beforehand.
-// This includes gaps at the top for micro usb and trrs, and screw holes.
+// This includes gaps at the top for micro usb and trrs (unless connected === true), and screw holes.
 // Starting in the top left, after the curved corner.
-function get_layer(top_length_left: number, top_length_right: number): string {
+function get_layer(top_length_left: number, top_length_right: number, connected = false): string {
   let text = '';
-  // 0 to indicate lining up with the screw square
-  if (top_length_left !== 0) {
+  if (connected) {
+    // Complete the outer perimeter, and start the inner
+    text += `      Z" />\n`;
+    text += `    <path d="M ${0.5*board_width} ${board_padding+kerf2}\n`;
+  } else {
     text += `      H ${top_length_left+kerf2} V ${board_padding+kerf2}\n`;
   }
   // top left screw padding
@@ -176,7 +179,10 @@ function get_layer(top_length_left: number, top_length_right: number): string {
   // top right screw padding (1u lower, so more tricky)
   text += `      V ${screw_top_right+screw_square+kerf2}\n`;
   text += `      H ${board_width-(screw_square2)} a ${screw_square2+kerf2} ${screw_square2+kerf2} 0 0 1 0 -${screw_square+kerf} H ${board_width-(board_padding+kerf2)}\n`;
-  text += `      V ${board_padding+kerf2} H ${board_width-top_length_right-kerf2} V ${-kerf2}\n`;
+  text += `      V ${board_padding+kerf2}\n`;
+  if (!connected) {
+    text += `      H ${board_width-top_length_right-kerf2} V ${-kerf2}\n`;
+  }
   text += `      Z" />\n`;
   let radius = 0.5*(screw_size_big)-kerf2;
   text += `    <circle cx="${screw_square2}" cy="${screw_square2}" r="${radius}" />\n`;
@@ -265,6 +271,12 @@ function getSvg(keyboardName: string, layoutText: string, svgPos: number): strin
   text += `    <circle cx="${screw_square2}" cy="${board_height-screw_square2}" r="${radius}" />\n`;
   text += `    <circle cx="${board_width-screw_square2}" cy="${board_height-screw_square2}" r="${radius}" />\n`;
   text += `    <circle cx="${board_width-screw_square2}" cy="${screw_top_right+screw_square2}" r="${radius}" />\n`;
+  text += '  </g>\n';
+
+  // Layer 5 - extra sandwich layer for cherry MX switches, rather than kailh choc v2
+  text += `  <g transform="translate(${board_offset_padding + 4*board_offset_x} ${board_offset_padding + svgPos*board_offset_y})" ${styleText}>\n`;
+  text += board_outline;
+  text += get_layer(0, 0, true);
   text += '  </g>\n';
 
   return text;
