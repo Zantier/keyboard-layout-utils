@@ -193,10 +193,9 @@ function get_layer(top_length_left: number, top_length_right: number, connected 
 }
 
 function getSvg(keyboardName: string, layoutText: string, svgPos: number): string {
-  console.log(keyboardName);
   let layout = parseKeyboardLayout(layoutText);
   if (layout === 'error') {
-    console.log('error');
+    console.log(keyboardName, 'error');
     return;
   }
 
@@ -285,8 +284,8 @@ function getSvg(keyboardName: string, layoutText: string, svgPos: number): strin
 async function main() {
   let leftText = await fs.readFile('left.txt', 'utf8');
   let rightText = await fs.readFile('right.txt', 'utf8');
-  //showKeyPositions('left', leftText);
-  //showKeyPositions('right', rightText);
+  showKeyPositions('left', leftText);
+  showKeyPositions('right', rightText);
   let svgAll = '';
   svgAll += '<?xml version="1.0" encoding="UTF-8"?>\n';
   svgAll += '<svg xmlns="http://www.w3.org/2000/svg" width="790mm" height="384mm" viewBox="0 0 790 384"\n';
