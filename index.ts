@@ -155,6 +155,22 @@ function showKeyPositions(keyboardName: string, layoutText: string) {
   console.log('');
 }
 
+// r = radius of hexagon, before subtracting kerf
+function drawHex(r: number, x: number, y: number): string {
+  r -= kerf2;
+  let text = '';
+  text += `    <path d="M `;
+  for (let i = 0; i < 6; i++) {
+    if (i > 0) {
+      text += `      L `;
+    }
+    let angle = i*Math.PI/3;
+    text += `${x+r*Math.cos(angle)} ${y+r*Math.sin(angle)}\n`;
+  }
+  text += `      Z" />\n`;
+  return text;
+}
+
 // Get part of the svg text for a sandwich layer, assuming the board outline came beforehand.
 // This includes gaps at the top for micro usb and trrs (unless connected === true), and screw holes.
 // Starting in the top left, after the curved corner.
@@ -184,11 +200,10 @@ function get_layer(top_length_left: number, top_length_right: number, connected 
     text += `      H ${board_width-top_length_right-kerf2} V ${-kerf2}\n`;
   }
   text += `      Z" />\n`;
-  let radius = 0.5*(screw_size_big)-kerf2;
-  text += `    <circle cx="${screw_square2}" cy="${screw_square2}" r="${radius}" />\n`;
-  text += `    <circle cx="${screw_square2}" cy="${board_height-screw_square2}" r="${radius}" />\n`;
-  text += `    <circle cx="${board_width-screw_square2}" cy="${board_height-screw_square2}" r="${radius}" />\n`;
-  text += `    <circle cx="${board_width-screw_square2}" cy="${screw_top_right+screw_square2}" r="${radius}" />\n`;
+  text += drawHex(0.5*screw_size_big, screw_square2, screw_square2);
+  text += drawHex(0.5*screw_size_big, screw_square2, board_height-screw_square2);
+  text += drawHex(0.5*screw_size_big, board_width-screw_square2, board_height-screw_square2);
+  text += drawHex(0.5*screw_size_big, board_width-screw_square2, screw_top_right+screw_square2);
   return text;
 }
 
